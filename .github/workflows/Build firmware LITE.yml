@@ -26,13 +26,16 @@ jobs:
           echo "$v=${!v}" >> $GITHUB_ENV
         done
 
-- name: Download sources and toolchain
+    - name: Download sources and toolchain
       run: |
         git config --global --add safe.directory '*'
         git config --global http.postBuffer 1048576000
         git config --global http.lowSpeedLimit 0
         git config --global http.lowSpeedTime 999999
-        for i in 1 2 3; do git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO" && break || sleep 10; done
+        for i in 1 2 3; do
+          rm -rf padavan-ng
+          git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO" padavan-ng && break || sleep 10
+        done
         git -C padavan-ng checkout "$PADAVAN_COMMIT"
         wget -qO- "$PADAVAN_TOOLCHAIN_URL" | tar -C padavan-ng --zstd -xf -
 
@@ -97,53 +100,29 @@ jobs:
         tag_name: release-${{ env.BUILD_TIMESTAMP }}
         release_name: Padavan TP-Link Archer C5 V4 LITE (${{ env.BUILD_TIMESTAMP }})
         body: |
-          ## 💝 Поддержать разработку
-
-          Если вам нравится прошивка, вы можете поддержать разработку:
-
-          - [Купить кофе](https://pay.cloudtips.ru/p/afb55f71)
-          - [Поддержать на Boosty](https://boosty.to/danayer)
-          
-          ℹ️ О прошивке
-          
-          Данная прошивка является максимально чистой версией, созданной специально для обхода блокировок сайтов и комфортного пользования интернетом.
+          ## 💝 О прошивке
+          Сборка Padavan с поддержкой USB-модемов, накопителей, DoH, DNSCrypt и Zapret (nfqws).
           
           📋 Инструкция прошивки
-          
           🔰 Подготовка:
-
               🛡️ Отключаем брандмауэр
               🔌 Подключаем кабель в LAN порт
               ⚙️ Настраиваем IP: 192.168.0.66
               💿 Распаковываем и запускаем Tftpd64
               📁 Копируем tp_recovery.bin в папку TFTP
 
-
-          📝 Процесс прошивки:
-
+          📝 Процесс первой прошивки со стока:
               🔌 Выключаем роутер
               ⚡ Зажимаем Reset + включаем питание
               ⏲️ Ждем 10-15 секунд
               🔄 Отпускаем Reset
-              📊 Следим за процессом прошивки в окне Tftpd64
-              ✅ Ждем завершения прошивки
+              📊 Следим за процессом в окне Tftpd64
+              ✅ Ждем перезагрузки роутера
 
-
-          ⚠️ Важно: После прошивки верните автоматическое получение IP
-
-
-          🔄 Обновление прошивки
-          📥 Установка актуальной версии:
-
-              📱 Подключитесь к роутеру по кабелю LAN (не по Wi-Fi!)
-              🌐 Откройте веб-интерфейс http://192.168.1.1
-              ⚙️ Перейдите в раздел Администрирование -> Обновление прошивки
-              📦 Скачайте последнюю версию прошивки с GitHub Releases
-              📤 Выберите скачанный файл .bin (не архив!)
-              ✅ Нажмите "Обновить" и дождитесь перезагрузки (3-5 минут)
-
-
-          💡 Примечание: Первая прошивка через TFTP нужна только один раз. Все последующие обновления устанавливаются через веб-интерфейс.
+          🔄 Обновление (если уже стоит Padavan):
+              📱 Зайти в http://192.168.1.1
+              ⚙️ Администрирование -> Обновление прошивки
+              📤 Выбрать скачанный файл .bin
         draft: false
         prerelease: false
 
