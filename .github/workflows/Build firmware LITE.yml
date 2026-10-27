@@ -26,10 +26,13 @@ jobs:
           echo "$v=${!v}" >> $GITHUB_ENV
         done
 
-    - name: Download sources and toolchain
+- name: Download sources and toolchain
       run: |
         git config --global --add safe.directory '*'
-        git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO"
+        git config --global http.postBuffer 1048576000
+        git config --global http.lowSpeedLimit 0
+        git config --global http.lowSpeedTime 999999
+        for i in 1 2 3; do git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO" && break || sleep 10; done
         git -C padavan-ng checkout "$PADAVAN_COMMIT"
         wget -qO- "$PADAVAN_TOOLCHAIN_URL" | tar -C padavan-ng --zstd -xf -
 
